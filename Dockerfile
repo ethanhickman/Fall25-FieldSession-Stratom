@@ -4,10 +4,6 @@
 ###########################################
 FROM nvidia/cuda:11.7.1-devel-ubuntu22.04 AS base
 
-# Build args for user and group ids
-ARG USER_ID
-ARG GROUP_ID
-
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install language
@@ -163,7 +159,11 @@ ENV NVIDIA_VISIBLE_DEVICES \
 ENV NVIDIA_DRIVER_CAPABILITIES \
     ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
 
+# Build args for user and group ids
+ARG USER_ID
+ARG GROUP_ID
+
 # Setup non-root user
-RUN addgroup --gid $GROUP_ID user
-RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID user
+RUN addgroup --gid "$GROUP_ID" user
+RUN adduser --disabled-password --gecos '' --uid "$USER_ID" --gid "$GROUP_ID" user
 USER user
