@@ -162,3 +162,6 @@ ENV NVIDIA_VISIBLE_DEVICES \
     ${NVIDIA_VISIBLE_DEVICES:-all}
 ENV NVIDIA_DRIVER_CAPABILITIES \
     ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
+
+# Add line into bashrc so that it automatically source ros2 setup
+RUN echo 'source /opt/ros/humble/setup.bash' >> /root/.bashrc

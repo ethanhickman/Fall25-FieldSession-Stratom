@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            "intel_pub = dunnage_capture.intel_pub:main"
         ],
     },
 )

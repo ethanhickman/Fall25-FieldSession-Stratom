@@ -5,7 +5,7 @@ build-image:
 	docker build -t $(IMAGE_NAME) .
 
 run-container:
-	docker run --rm -it --name $(CONTAINER_NAME) -v "$(shell pwd)":/app -w /app $(IMAGE_NAME) /bin/bash
+	docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb --group-add video --name $(CONTAINER_NAME) -v "$(shell pwd)":/app -w /app $(IMAGE_NAME) /bin/bash
 
 change-ownership:
 	sudo chown -R $(id -u):$(id -g) .
