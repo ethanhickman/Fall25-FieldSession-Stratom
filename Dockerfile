@@ -95,21 +95,21 @@ ENV DEBIAN_FRONTEND=
 ###########################################
 #  Full+Gazebo image 
 ###########################################
-FROM full AS gazebo
-
-ENV DEBIAN_FRONTEND=noninteractive
-# Install gazebo
-RUN apt-get update && apt-get install -y \
-  ros-humble-gazebo* \
-  && rm -rf /var/lib/apt/lists/*
-ENV DEBIAN_FRONTEND=
-
+#FROM full AS gazebo
+#
+#ENV DEBIAN_FRONTEND=noninteractive
+## Install gazebo
+#RUN apt-get update && apt-get install -y \
+#  ros-humble-gazebo* \
+#  && rm -rf /var/lib/apt/lists/*
+#ENV DEBIAN_FRONTEND=
+#
 ###########################################
 #  Full+Gazebo+Nvidia image 
 ###########################################
-
-FROM gazebo AS gazebo-nvidia
-
+#
+#FROM gazebo AS gazebo-nvidia
+#
 ################
 # Preliminary Machine Learning Dependencies
 ################
@@ -161,7 +161,3 @@ ENV NVIDIA_VISIBLE_DEVICES \
     ${NVIDIA_VISIBLE_DEVICES:-all}
 ENV NVIDIA_DRIVER_CAPABILITIES \
     ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
-
-
-# Append the source line to root's .bashrc
-RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc
