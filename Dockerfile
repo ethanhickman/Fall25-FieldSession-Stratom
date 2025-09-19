@@ -63,6 +63,7 @@ RUN apt-get update && apt-get install -y \
   python3-rosdep \
   python3-vcstool \
   vim \
+  neovim \
   wget \
   python3-autopep8 \
   && rm -rf /var/lib/apt/lists/* \
