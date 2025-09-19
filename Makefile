@@ -7,8 +7,11 @@ build-image:
 run-container:
 	docker run --rm -it --name $(CONTAINER_NAME) -v "$(shell pwd)":/app -w /app $(IMAGE_NAME) /bin/bash
 
+change-ownership:
+	sudo chown -R $(id -u):$(id -g) .
+
 clean:
 	docker rm -f $(CONTAINER_NAME)
 	docker rmi $$(docker images -q $(IMAGE_NAME))
 
-.PHONY: build-image run-container clean
+.PHONY: build-image run-container clean change-ownership
