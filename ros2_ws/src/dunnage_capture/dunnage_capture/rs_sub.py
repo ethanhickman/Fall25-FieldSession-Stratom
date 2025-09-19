@@ -9,20 +9,24 @@ import cv2
 class RealSenseSubscriber(Node):
     def __init__(self):
         super().__init__('rs_sub')
-        self.subscription = self.create_subscription(Image, '/camera/color/image_raw', self.listener_callback, 10)
+        self.subscription = self.create_subscription(Image, '/camera/camera/color/image_raw', self.listener_callback, 10)
         self.bridge = CvBridge()
+        #self.cv_image = None
+        #self.create_timer(0.03, self.show_frame)
 
     def listener_callback(self, msg):
         try:
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             cv2.imshow("RealSense RGB image", cv_image)
             cv2.waitKey(1)
-            print("Got image")
-            self.get_logger().info("Got image")
         except Exception as e:
             print(e)
             self.get_logger().error("Error converting image")
 
+    #def show_frame(self):
+    #    if self.cv_image is not None:
+    #        cv2.imshow("RealSense RGB image", cv_image)
+    #        cv2.waitKey(1)
 
 def main(args=None):
     rclpy.init(args=args)

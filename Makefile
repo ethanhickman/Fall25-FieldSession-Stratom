@@ -8,8 +8,8 @@ run-container:
 	docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb --group-add video --name $(CONTAINER_NAME) -v "$(shell pwd)":/app -w /app $(IMAGE_NAME) /bin/bash
 
 run-container-x11:
-	xhost +local:root
-	docker run --rm -it --env DISPLAY=$DISPLAY --env QT_X11_NO_MITSHM=1 --volume /tmp/.X11-unix:/tmp/.X11-unix --privileged -v /dev/bus/usb:/dev/bus/usb --group-add video  --name $(CONTAINER_NAME) -v "$(shell pwd)":/app -w /app $(IMAGE_NAME) /bin/bash
+	xhost +local:docker
+	docker run --rm -it -e DISPLAY=$(DISPLAY) -v /tmp/.X11-unix:/tmp/.X11-unix --privileged -v /dev/bus/usb:/dev/bus/usb --group-add video  --name $(CONTAINER_NAME) -v "$(shell pwd)":/app -w /app $(IMAGE_NAME) /bin/bash
 
 attach-shell:
 	docker exec -it $(CONTAINER_NAME) /bin/bash
@@ -21,4 +21,4 @@ clean:
 	docker rm -f $(CONTAINER_NAME)
 	docker rmi $$(docker images -q $(IMAGE_NAME))
 
-.PHONY: build-image run-container clean change-ownership
+.PHONY: build-image run-container clean change-ownership attach-shell run-container-x11
