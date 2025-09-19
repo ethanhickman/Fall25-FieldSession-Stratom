@@ -152,6 +152,9 @@ RUN pip install empy catkin-pkg lark
 RUN pip uninstall numpy -y
 RUN pip install numpy==1.26
 
+# Install python-lsp-server for completion
+RUN pip install python-lsp-server
+
 # Env vars for the nvidia-container-runtime.
 ENV QT_X11_NO_MITSHM 1
 ENV NVIDIA_VISIBLE_DEVICES \
@@ -159,11 +162,6 @@ ENV NVIDIA_VISIBLE_DEVICES \
 ENV NVIDIA_DRIVER_CAPABILITIES \
     ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
 
-# Build args for user and group ids
-ARG USER_ID
-ARG GROUP_ID
 
-# Setup non-root user
-RUN addgroup --gid "$GROUP_ID" user
-RUN adduser --disabled-password --gecos '' --uid "$USER_ID" --gid "$GROUP_ID" user
-USER user
+# Append the source line to root's .bashrc
+RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc
