@@ -7,6 +7,13 @@ build-image:
 run-container:
 	docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb --group-add video --name $(CONTAINER_NAME) -v "$(shell pwd)":/app -w /app $(IMAGE_NAME) /bin/bash
 
+run-container-x11:
+	xhost +local:root
+	docker run --rm -it --env DISPLAY=$DISPLAY --env QT_X11_NO_MITSHM=1 --volume /tmp/.X11-unix:/tmp/.X11-unix --privileged -v /dev/bus/usb:/dev/bus/usb --group-add video  --name $(CONTAINER_NAME) -v "$(shell pwd)":/app -w /app $(IMAGE_NAME) /bin/bash
+
+attach-shell:
+	docker exec -it $(CONTAINER_NAME) /bin/bash
+
 change-ownership:
 	sudo chown -R $(id -u):$(id -g) .
 

@@ -17,6 +17,8 @@ class RealSenseSubscriber(Node):
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             cv2.imshow("RealSense RGB image", cv_image)
             cv2.waitKey(1)
+            print("Got image")
+            self.get_logger().info("Got image")
         except Exception as e:
             print(e)
             self.get_logger().error("Error converting image")
