@@ -1,0 +1,16 @@
+package.xml
+setup.cfg
+setup.py
+../build/bag_reader_node_py/bag_reader_node_py.egg-info/PKG-INFO
+../build/bag_reader_node_py/bag_reader_node_py.egg-info/SOURCES.txt
+../build/bag_reader_node_py/bag_reader_node_py.egg-info/dependency_links.txt
+../build/bag_reader_node_py/bag_reader_node_py.egg-info/entry_points.txt
+../build/bag_reader_node_py/bag_reader_node_py.egg-info/requires.txt
+../build/bag_reader_node_py/bag_reader_node_py.egg-info/top_level.txt
+../build/bag_reader_node_py/bag_reader_node_py.egg-info/zip-safe
+bag_reader_node_py/__init__.py
+bag_reader_node_py/bag_reader.py
+resource/bag_reader_node_py
+test/test_copyright.py
+test/test_flake8.py
+test/test_pep257.py

@@ -32,7 +32,7 @@ class BagReader(Node):
 def main(args=None):
     try:
         with rclpy.init(args=args):
-            sbr = SimpleBagReader()
+            sbr = BagReader()
             rclpy.spin(sbr)
     except (KeyboardInterrupt, ExternalShutdownException):
         pass

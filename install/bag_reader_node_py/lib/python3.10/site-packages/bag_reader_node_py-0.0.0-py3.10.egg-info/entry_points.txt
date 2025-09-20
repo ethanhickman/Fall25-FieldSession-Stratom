@@ -1,0 +1,3 @@
+[console_scripts]
+bag_reader = bag_reader_node_py.bag_reader:main
+
