@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'rs_camera_viewer = dunnage_detection.rs_camera_viewer:main'
+            'rs_camera_viewer = dunnage_detection.rs_camera_viewer:main',
+            'rs_bag_snapshot = dunnage_detection.rs_bag_snapshot:main'
         ],
     },
 )
