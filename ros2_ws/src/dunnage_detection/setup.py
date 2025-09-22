@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'dunnage_capture'
+package_name = 'dunnage_detection'
 
 setup(
     name=package_name,
@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "rs_sub = dunnage_capture.rs_sub:main"
+            'rs_camera_viewer = dunnage_detection.rs_camera_viewer:main'
         ],
     },
 )
