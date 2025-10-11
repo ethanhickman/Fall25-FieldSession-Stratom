@@ -15,7 +15,7 @@ attach-shell:
 	docker exec -it $(CONTAINER_NAME) /bin/bash
 
 change-ownership:
-	sudo chown -R $(id -u):$(id -g) .
+	sudo chown -R $$(id -u):$$(id -g) .
 
 clean:
 	docker rm -f $(CONTAINER_NAME)
