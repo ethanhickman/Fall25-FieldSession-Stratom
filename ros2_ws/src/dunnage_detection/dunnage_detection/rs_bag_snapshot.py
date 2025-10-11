@@ -2,11 +2,14 @@ import rclpy
 from rclpy.node import Node
 from rclpy.serialization import serialize_message
 
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CameraInfo
 from rosbag2_py import SequentialWriter, StorageOptions, ConverterOptions, TopicMetadata
 
 import time
+from datetime import datetime
 import threading
+
+import yaml
 
 
 class BagRecorder(Node):
@@ -51,6 +54,7 @@ class BagRecorder(Node):
 
         # create writer and flags
         self.writer = SequentialWriter()
+        self.out_folder = ""
 
         # create topic info
         self.topics = []
@@ -65,6 +69,24 @@ class BagRecorder(Node):
             "/camera/camera/aligned_depth_to_color/image_raw",
             "sensor_msgs/msg/Image",
             Image
+        ))
+        self.topics.append(BagRecorder.TopicData(
+            self,
+            "/camera/camera/color/camera_info",
+            "sensor_msgs/msg/CameraInfo",
+            CameraInfo
+        ))
+        self.topics.append(BagRecorder.TopicData(
+            self,
+            "/camera/camera/depth/image_rect_raw",
+            "sensor_msgs/msg/Image",
+            Image
+        ))
+        self.topics.append(BagRecorder.TopicData(
+            self,
+            "/camera/camera/depth/camera_info",
+            "sensor_msgs/msg/CameraInfo",
+            CameraInfo
         ))
 
         # threading and thread communication
@@ -83,9 +105,25 @@ class BagRecorder(Node):
                 self.capture_frame()
                 while self.get_capture_status():
                     time.sleep(0.1)
+                measurements = {}
+                measurements["dunnage_voffset"] = self.record_measurement("Dunnage Height Relative to Camera [below camera is negative] (meters)")
+                measurements["dunnage_hoffset"] = self.record_measurement("Dunnage Horizontal Position Relative to Camera [left of camera is negative] (meters)")
+                measurements["dunnage_doffset"] = self.record_measurement("Dunnage Distance Relative to Camera (meters)")
+                measurements["dunnage_angle"] = self.record_measurement("Dunnage Angle Relative to Camera (degrees)")
+                with open(self.out_folder + "measurements.yaml", "w") as f:
+                    yaml.dump(measurements, f)
             elif user_in == "q":
                 rclpy.shutdown()
                 break
+
+    def record_measurement(self, name):
+        while True:
+            user_in = input("Enter the " + name + ": ")
+            try:
+                return float(user_in)
+            except ValueError:
+                print("Invalid measurment!")
+        
 
     def display_help(self):
         print("h: help message")
@@ -93,7 +131,9 @@ class BagRecorder(Node):
         print("q: quit")
 
     def capture_frame(self):
-        fn = "data/rs_frame_" + str(time.time())
+        #self.out_folder = "data/rs_frame_" + str(time.time()) + "/"
+        self.out_folder = "data/rs_frame_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "/"
+        fn = self.out_folder + "bag"
         storage_options = StorageOptions(uri=fn, storage_id="sqlite3")
         converter_options = ConverterOptions("", "")
 
