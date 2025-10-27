@@ -2,7 +2,10 @@
 ###########################################
 # Base image 
 ###########################################
-FROM nvidia/cuda:11.7.1-devel-ubuntu22.04 AS base
+# FROM nvidia/cuda:11.7.1-devel-ubuntu22.04 AS base
+#FROM nvcr.io/nvidia/l4t-base:r36.2.0 AS base
+FROM nvcr.io/nvidia/l4t-jetpack:r36.2.0 AS base
+#FROM nvcr.io/nvidia/pytorch:23.10-py3-igpu AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -92,24 +95,6 @@ RUN apt-get update && apt-get install -y \
   && colcon mixin update default
 ENV DEBIAN_FRONTEND=
 
-###########################################
-#  Full+Gazebo image 
-###########################################
-#FROM full AS gazebo
-#
-#ENV DEBIAN_FRONTEND=noninteractive
-## Install gazebo
-#RUN apt-get update && apt-get install -y \
-#  ros-humble-gazebo* \
-#  && rm -rf /var/lib/apt/lists/*
-#ENV DEBIAN_FRONTEND=
-#
-###########################################
-#  Full+Gazebo+Nvidia image 
-###########################################
-#
-#FROM gazebo AS gazebo-nvidia
-#
 ################
 # Preliminary Machine Learning Dependencies
 ################
@@ -133,13 +118,45 @@ RUN apt-get install libgl1-mesa-glx libglib2.0-0 -y
 RUN apt-get install openmpi-bin openmpi-common libopenmpi-dev libgtk2.0-dev -y
 
 # Install python libraries for DL
-RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-RUN pip install Pillow
-RUN pip install tqdm
-RUN pip install torchpack
-RUN pip install numba
+#RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+#RUN pip install Pillow
+#RUN pip install tqdm
+#RUN pip install torchpack
+#RUN pip install numba
+#RUN pip install opencv-python
+#RUN pip install pandas
+
+# Pytorch
+#RUN apt-get install libopenblas-dev -y
+#RUN wget raw.githubusercontent.com/pytorch/pytorch/5c6af2b583709f6176898c017424dc9981023c28/.ci/docker/common/install_cusparselt.sh 
+#RUN export CUDA_VERSION=12.6 && bash ./install_cusparselt.sh
+#RUN export TORCH_INSTALL=https://developer.download.nvidia.cn/compute/redist/jp/v511/pytorch/torch-2.0.0+nv23.05-cp38-cp38-linux_aarch64.whl && pip install --no-cache $TORCH_INSTALL
+#RUN pip install --no-cache-dir https://nvidia.box.com/shared/static/mp164asf3sceb570wvjsrezk1p4ftj8t.whl
+#RUN pip install --no-cache-dir https://nvidia.box.com/shared/static/xpr06qe6ql3l6rj22cu3c45tz1wzi36p.whl
+
+
+# YoloV9o
+RUN pip install gitpython
+RUN pip install ipython
+RUN pip install matplotlib
+RUN pip install numpy
 RUN pip install opencv-python
+RUN pip install Pillow
+RUN pip install psutil
+RUN pip install PyYAML
+RUN pip install requests
+RUN pip install scipy
+RUN pip install thop
+RUN pip install torch
+RUN pip install torchvision
+RUN pip install tqdm
+
 RUN pip install pandas
+RUN pip install seaborn
+
+RUN pip install albumentations
+RUN pip install pycocotools
+
 
 # Jupyter Notebook
 RUN pip install notebook ipykernel
@@ -164,3 +181,4 @@ ENV NVIDIA_DRIVER_CAPABILITIES \
 
 # Add line into bashrc so that it automatically source ros2 setup
 RUN echo 'source /opt/ros/humble/setup.bash' >> /root/.bashrc
+#RUN echo 'export ISAAC_ROS_WS=/app/isaac_ros-dev/' >> ~/root/.bashrc
