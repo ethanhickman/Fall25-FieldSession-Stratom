@@ -4,8 +4,9 @@
 ###########################################
 # FROM nvidia/cuda:11.7.1-devel-ubuntu22.04 AS base
 #FROM nvcr.io/nvidia/l4t-base:r36.2.0 AS base
-FROM nvcr.io/nvidia/l4t-jetpack:r36.2.0 AS base
+#FROM nvcr.io/nvidia/l4t-jetpack:r36.2.0 AS base
 #FROM nvcr.io/nvidia/pytorch:23.10-py3-igpu AS base
+FROM nvcr.io/nvidia/l4t-jetpack:r36.4.0 AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -134,6 +135,9 @@ RUN apt-get install openmpi-bin openmpi-common libopenmpi-dev libgtk2.0-dev -y
 #RUN pip install --no-cache-dir https://nvidia.box.com/shared/static/mp164asf3sceb570wvjsrezk1p4ftj8t.whl
 #RUN pip install --no-cache-dir https://nvidia.box.com/shared/static/xpr06qe6ql3l6rj22cu3c45tz1wzi36p.whl
 
+# Pytorch
+RUN apt-get install libopenblas-base libopenmpi-dev libomp-dev -y 
+RUN pip3 install torch==2.8.0 torchvision==0.23.0 --index-url https://pypi.jetson-ai-lab.io/jp6/cu126
 
 # YoloV9o
 RUN pip install gitpython
@@ -141,15 +145,16 @@ RUN pip install ipython
 RUN pip install matplotlib
 RUN pip install numpy
 RUN pip install opencv-python
-RUN pip install Pillow
+RUN pip install Pillow==9.5.0
 RUN pip install psutil
 RUN pip install PyYAML
 RUN pip install requests
 RUN pip install scipy
 RUN pip install thop
-RUN pip install torch
-RUN pip install torchvision
+#RUN pip install torch
+#RUN pip install torchvision
 RUN pip install tqdm
+RUN pip install tensorboard
 
 RUN pip install pandas
 RUN pip install seaborn
