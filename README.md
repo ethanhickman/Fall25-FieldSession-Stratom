@@ -28,11 +28,13 @@ Additionally, there are make targets for running each node that handle sourcing 
 
 
 #### Data Collection Method
-Bag snapshots of dunnage consisting single messages from various topics created by the realsense camera driver will be collected with the `rs_bag_capture` node. The bag will be stored in a timestamped directory along with a yaml file containing measurements associated with the snapshot and any output from the `bag_reader` node. The measurements in the yaml file will be as follows:
+Bag snapshots of dunnage consisting single messages from various topics created by the realsense camera driver will be collected with the `rs_bag_capture` node. The bag will be stored in a timestamped directory.
 
-- dunnage_voffset: The height of the dunnage relative to the realsense camera in meters. This will likely always be a negative measurement as the camera will be higher than the dunnage
-- dunnage_hoffset: The horizontal position of the dunnage relative to the realsense camera in meters. If the dunnage is more to the left in the image, it will be negative while if the dunnage is more on the right, it will be positive.
-- dunnage_doffset: The depth distance the dunnage is relative to the realsense camera in meters. This should always be positive as the dunnage should always be somewhere in front of the camera.
-- dunnage_angle: The angle of the dunnage relative to the realsense camera in degrees
 
-*NOTE:* The dunnage position will be the position of the top right corner of the face of the center piece of dunnage. The reference point of the camera will be the front of the color camera lens.
+
+
+#### Misc notes
+- The docker container needs cuda at build time for darknet
+	- Put the daemon.json file in /etc/docker and restart docker with systemctl restart docker
+	- Can't use buildx, see makefile build-image target for example
+

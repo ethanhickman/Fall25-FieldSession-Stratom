@@ -15,5 +15,8 @@ yolo_ws/train/
 yolo_ws/valid/
 yolo_ws/test/
 
-# Python wheels
+# python wheels
 *.whl
+
+# zip files
+*.zip
