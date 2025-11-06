@@ -2,7 +2,9 @@
 ###########################################
 # Base image 
 ###########################################
-FROM nvidia/cuda:11.7.1-devel-ubuntu22.04 AS base
+# Tag for non jetson devices
+# FROM nvidia/cuda:11.7.1-devel-ubuntu22.04 AS base
+FROM nvcr.io/nvidia/l4t-jetpack:r36.4.0 AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -92,24 +94,6 @@ RUN apt-get update && apt-get install -y \
   && colcon mixin update default
 ENV DEBIAN_FRONTEND=
 
-###########################################
-#  Full+Gazebo image 
-###########################################
-#FROM full AS gazebo
-#
-#ENV DEBIAN_FRONTEND=noninteractive
-## Install gazebo
-#RUN apt-get update && apt-get install -y \
-#  ros-humble-gazebo* \
-#  && rm -rf /var/lib/apt/lists/*
-#ENV DEBIAN_FRONTEND=
-#
-###########################################
-#  Full+Gazebo+Nvidia image 
-###########################################
-#
-#FROM gazebo AS gazebo-nvidia
-#
 ################
 # Preliminary Machine Learning Dependencies
 ################
@@ -132,18 +116,69 @@ RUN apt-get install build-essential g++ gcc -y
 RUN apt-get install libgl1-mesa-glx libglib2.0-0 -y
 RUN apt-get install openmpi-bin openmpi-common libopenmpi-dev libgtk2.0-dev -y
 
-# Install python libraries for DL
-RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-RUN pip install Pillow
-RUN pip install tqdm
-RUN pip install torchpack
-RUN pip install numba
-RUN pip install opencv-python
-RUN pip install pandas
+# Pytorch
+RUN apt-get install libopenblas-base libopenmpi-dev libomp-dev -y 
+RUN pip3 install torch==2.8.0 torchvision==0.23.0 --index-url https://pypi.jetson-ai-lab.io/jp6/cu126
 
-# Jupyter Notebook
-RUN pip install notebook ipykernel
-RUN pip install matplotlib
+# Darknet Yolo
+RUN apt-get update && apt-get install -y \
+  wget \
+  && mkdir /opt/cmake \
+  && wget -O /opt/cmake/cmake-3.30.0-linux-aarch64.tar.gz https://github.com/Kitware/CMake/releases/download/v3.30.0/cmake-3.30.0-linux-aarch64.tar.gz \
+  && tar -xzf /opt/cmake/cmake-3.30.0-linux-aarch64.tar.gz -C /opt/cmake/
+ENV PATH="/opt/cmake/cmake-3.30.0-linux-aarch64/bin:${PATH}"
+
+# This will fail at the make package step if cuda is not found at build time
+# comment out if needed
+RUN apt-get update && sudo apt-get install -y \
+  build-essential \
+  libopencv-dev \
+  git \
+  && mkdir /opt/darknet \
+  && git clone --branch v5.1 https://codeberg.org/CCodeRun/darknet.git /opt/darknet/ \
+  && mkdir /opt/darknet/build \
+  && cd /opt/darknet/build \
+  && cmake -DCMAKE_BUILD_TYPE=Release .. \
+  && make -j $(nrpoc) \
+  && make package \
+  && dpkg -i darknet*.deb
+
+RUN apt-get update && sudo apt-get install -y \
+  build-essential \
+  libtclap-dev \
+  libmagic-dev \
+  libopencv-dev \
+  git \
+  && mkdir /opt/DarkHelp \
+  && git clone https://codeberg.org/CCodeRun/DarkHelp.git /opt/DarkHelp/ \
+  && mkdir /opt/DarkHelp/build \
+  && cd /opt/DarkHelp/build \
+  && cmake -DCMAKE_BUILD_TYPE=Release .. \
+  && make -j $(nproc) \
+  && make package \
+  && dpkg -i darkhelp*.deb
+
+# YoloV9
+#RUN pip install gitpython
+#RUN pip install ipython
+#RUN pip install matplotlib
+#RUN pip install numpy
+#RUN pip install opencv-python
+#RUN pip install Pillow==9.5.0
+#RUN pip install psutil
+#RUN pip install PyYAML
+#RUN pip install requests
+#RUN pip install scipy
+#RUN pip install thop
+#RUN pip install tqdm
+#RUN pip install tensorboard
+
+RUN pip install pandas
+RUN pip install seaborn
+
+RUN pip install albumentations
+RUN pip install pycocotools
+
 
 # Install packages to make ros_build work
 RUN pip install empy catkin-pkg lark

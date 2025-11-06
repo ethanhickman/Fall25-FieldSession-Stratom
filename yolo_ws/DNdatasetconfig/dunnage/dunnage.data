@@ -1,0 +1,5 @@
+classes = 2
+train = /app/yolo_ws/dn_dataset/dunnage/train.txt
+valid = /app/yolo_ws/dn_dataset/dunnage/valid.txt
+names = /app/yolo_ws/dn_dataset/dunnage/dunnage.names
+backup = /app/yolo_ws/dn_dataset/dunnage

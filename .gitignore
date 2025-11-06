@@ -8,3 +8,15 @@ data/
 
 # pycache files
 __pycache__/
+
+# yolo artifacts
+yolo_ws/weights/
+yolo_ws/train/
+yolo_ws/valid/
+yolo_ws/test/
+
+# python wheels
+*.whl
+
+# zip files
+*.zip

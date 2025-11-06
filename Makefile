@@ -3,14 +3,14 @@ CONTAINER_NAME := ros2-humble-container
 SOURCE_SETUP = . ./ros2_ws/install/setup.sh
 
 build-image:
-	docker build -t $(IMAGE_NAME) .
+	DOCKER_BUILDKIT=0 docker build -t $(IMAGE_NAME) .
 
 run-container:
-	docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb --group-add video --name $(CONTAINER_NAME) -v "$(shell pwd)":/app -w /app $(IMAGE_NAME) /bin/bash
+	docker run --rm -it --ipc=host --runtime nvidia --gpus all --network host -e DISPLAY=$(DISPLAY) -v /tmp/.X11-unix:/tmp/.X11-unix --privileged --group-add video --name $(CONTAINER_NAME) -v "$(shell pwd)":/app -w /app $(IMAGE_NAME) /bin/bash
 
 run-container-x11:
 	xhost +local:docker
-	docker run --rm -it -e DISPLAY=$(DISPLAY) -v /tmp/.X11-unix:/tmp/.X11-unix --privileged -v /dev/bus/usb:/dev/bus/usb --group-add video  --name $(CONTAINER_NAME) -v "$(shell pwd)":/app -w /app $(IMAGE_NAME) /bin/bash
+	$(MAKE) run-container
 
 attach-shell:
 	docker exec -it $(CONTAINER_NAME) /bin/bash
@@ -42,5 +42,8 @@ run-bag-snapshot: check-ros-env build-ros-nodes
 
 run-bag-reader: check-ros-env build-ros-nodes
 	@$(SOURCE_SETUP) && ros2 run dunnage_detection bag_reader
+
+train-yolov9:
+	@cd yolo_ws/yolov9 && python3 train.py --batch 16 --epochs 50 --img 640 --device 0 --min-items 0 --close-mosaic 15 --data ../data.yaml --weights ../weights/gelan-m.pt --cfg models/detect/gelan-m.yaml --hyp data/hyps/hyp.scratch-high.yaml
 
 .PHONY: build-image run-container clean change-ownership attach-shell run-container-x11 check-ros-env build-ros-nodes run-camera-driver run-camera-viewer run-bag-snapshot run-bag-reader
