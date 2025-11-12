@@ -179,9 +179,11 @@ RUN pip install seaborn
 RUN pip install albumentations
 RUN pip install pycocotools
 
-
 # Install packages to make ros_build work
 RUN pip install empy catkin-pkg lark
+
+RUN apt-get install -y libgtk2.0-dev pkg-config
+RUN pip install opencv-python --no-cache-dir --force-reinstall
 
 # Hacky numpy version fix
 RUN pip uninstall numpy -y
