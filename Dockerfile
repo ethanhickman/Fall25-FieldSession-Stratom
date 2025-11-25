@@ -158,20 +158,29 @@ RUN apt-get update && sudo apt-get install -y \
   && make package \
   && dpkg -i darkhelp*.deb
 
-# YoloV9
-#RUN pip install gitpython
-#RUN pip install ipython
-#RUN pip install matplotlib
-#RUN pip install numpy
-#RUN pip install opencv-python
-#RUN pip install Pillow==9.5.0
-#RUN pip install psutil
-#RUN pip install PyYAML
-#RUN pip install requests
-#RUN pip install scipy
-#RUN pip install thop
-#RUN pip install tqdm
-#RUN pip install tensorboard
+
+# Megapose dependencies
+RUN pip install bokeh
+RUN pip install joblib
+RUN pip install pin
+RUN pip install transforms3d
+RUN pip install webdataset
+RUN pip install omegaconf
+RUN pip install tqdm
+RUN pip install imageio
+RUN pip install pypng
+RUN pip install trimesh
+RUN pip install panda3d
+RUN pip install simplejson
+RUN pip install open3d
+RUN pip install roma
+RUN pip install ipython
+RUN pip install selenium
+
+ENV PYTHONPATH /app/megapose_ws/megapose6d/src/:$PYTHONPATH
+ENV CONDA_PREFIX $(python3 -c "import sys; print(sys.prefix)")
+
+
 
 RUN pip install pandas
 RUN pip install seaborn

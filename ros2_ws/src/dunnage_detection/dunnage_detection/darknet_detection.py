@@ -8,6 +8,7 @@ import numpy as np
 import cv2
 import os
 import tempfile
+import json
 
 from . import DarkHelp
 
@@ -52,6 +53,15 @@ class DarknetDetection(Node):
                 with tempfile.NamedTemporaryFile(suffix=".jpg") as annotated_img:
                     DarkHelp.Annotate(self.dh, annotated_img.name.encode())
                     annotated_cv_image = cv2.imread(annotated_img.name)
+
+                    j = json.loads(DarkHelp.GetPredictionResults(self.dh))
+                    prediction = j['file'][0]['prediction'][0]
+                    data = [{
+                        "label": prediction['name'],
+                        "bbox_modal": [prediction['rect']['x'], prediction['rect']['y'], prediction['rect']['x'] + prediction['rect']['width'], prediction['rect']['y'] + prediction['rect']['height']]
+                    }]
+                    print(json.dumps(data))
+
 
                     cv2.imshow("RealSense RGB image", annotated_cv_image)
                     cv2.waitKey(1)

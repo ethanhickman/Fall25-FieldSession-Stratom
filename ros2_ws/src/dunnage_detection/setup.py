@@ -24,7 +24,7 @@ setup(
             'rs_camera_viewer = dunnage_detection.rs_camera_viewer:main',
             'rs_bag_snapshot = dunnage_detection.rs_bag_snapshot:main',
             'bag_reader = dunnage_detection.bag_reader:main',
-            'darknet_detection = dunnage_detection.darknet_detection:main'
+            'darknet_detection = dunnage_detection.darknet_detection:main',
         ],
     },
 )
