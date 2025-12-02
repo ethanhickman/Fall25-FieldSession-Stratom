@@ -10,6 +10,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        ('share/' + package_name, ['dunnage_detection/darknet_models/dunnage.cfg', 'dunnage_detection/darknet_models/dunnage.weights', 'dunnage_detection/darknet_models/dunnage.names']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -22,7 +23,8 @@ setup(
         'console_scripts': [
             'rs_camera_viewer = dunnage_detection.rs_camera_viewer:main',
             'rs_bag_snapshot = dunnage_detection.rs_bag_snapshot:main',
-            'bag_reader = dunnage_detection.bag_reader:main'
+            'bag_reader = dunnage_detection.bag_reader:main',
+            'darknet_detection = dunnage_detection.darknet_detection:main',
         ],
     },
 )

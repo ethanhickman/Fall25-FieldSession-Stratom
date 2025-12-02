@@ -2,20 +2,26 @@ IMAGE_NAME := ros2-humble-image
 CONTAINER_NAME := ros2-humble-container
 SOURCE_SETUP = . ./ros2_ws/install/setup.sh
 
+# builds docker images with legacy build system due to needing cuda at buildtime for darknet
 build-image:
 	DOCKER_BUILDKIT=0 docker build -t $(IMAGE_NAME) .
 
+# runs docker container based off of image with necessary configuration options
 run-container:
 	docker run --rm -it --ipc=host --runtime nvidia --gpus all --network host -e DISPLAY=$(DISPLAY) -v /tmp/.X11-unix:/tmp/.X11-unix --privileged --group-add video --name $(CONTAINER_NAME) -v "$(shell pwd)":/app -w /app $(IMAGE_NAME) /bin/bash
 
+# runs container with xhost which is needed to see gui apps in container
 run-container-x11:
 	xhost +local:docker
 	$(MAKE) run-container
 
+# attaches additional shells to an already running container
 attach-shell:
 	docker exec -it $(CONTAINER_NAME) /bin/bash
 
-change-ownership:
+# files created in docker container are owned by root due to docker configuration
+# this target will give ownership to local user when run outside of container
+get-ownership:
 	sudo chown -R $$(id -u):$$(id -g) .
 
 clean:
@@ -31,19 +37,17 @@ check-ros-env:
 build-ros-nodes: check-ros-env
 	@(cd ros2_ws && colcon build --symlink-install)
 
+# starts the realsense camera driver
 run-camera-driver: check-ros-env
 	@ros2 launch realsense2_camera rs_align_depth_launch.py
 
-run-camera-viewer: check-ros-env build-ros-nodes
-	@$(SOURCE_SETUP) && ros2 run dunnage_detection rs_camera_viewer
+# runs a given ros node in dunnage detection package with value of NODE
+run-node: check-ros-env build-ros-nodes
+	@if [ -z "$(NODE)" ]; then \
+		echo "Error: NODE not set. Use make run-node NODE=<node_name>"; \
+		exit 1; \
+	fi
+	@$(SOURCE_SETUP) && ros2 run dunnage_detection $(NODE)
 
-run-bag-snapshot: check-ros-env build-ros-nodes
-	@$(SOURCE_SETUP) && ros2 run dunnage_detection rs_bag_snapshot
 
-run-bag-reader: check-ros-env build-ros-nodes
-	@$(SOURCE_SETUP) && ros2 run dunnage_detection bag_reader
-
-train-yolov9:
-	@cd yolo_ws/yolov9 && python3 train.py --batch 16 --epochs 50 --img 640 --device 0 --min-items 0 --close-mosaic 15 --data ../data.yaml --weights ../weights/gelan-m.pt --cfg models/detect/gelan-m.yaml --hyp data/hyps/hyp.scratch-high.yaml
-
-.PHONY: build-image run-container clean change-ownership attach-shell run-container-x11 check-ros-env build-ros-nodes run-camera-driver run-camera-viewer run-bag-snapshot run-bag-reader
+.PHONY: build-image run-container clean get-ownership attach-shell run-container-x11 check-ros-env build-ros-nodes run-camera-driver run-node

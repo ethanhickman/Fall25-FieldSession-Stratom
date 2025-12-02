@@ -1,0 +1,4 @@
+sensor_msgs/Image color_image
+sensor_msgs/Image aligned_depth_image
+string camera_info_json
+string bounding_box_json
