@@ -11,6 +11,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name, ['dunnage_detection/darknet_models/dunnage.cfg', 'dunnage_detection/darknet_models/dunnage.weights', 'dunnage_detection/darknet_models/dunnage.names']),
+        ('share/' + package_name, ['dunnage_detection/meshes/dunnage.ply']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -25,6 +26,7 @@ setup(
             'rs_bag_snapshot = dunnage_detection.rs_bag_snapshot:main',
             'bag_reader = dunnage_detection.bag_reader:main',
             'darknet_detection = dunnage_detection.darknet_detection:main',
+            'megapose_inference = dunnage_detection.megapose_inference:main',
         ],
     },
 )
