@@ -21,7 +21,7 @@ from typing import List, Tuple, Union
 # Third Party
 import numpy as np
 from bokeh.plotting import gridplot
-from PIL import Image
+#from PIL import Image
 
 # MegaPose
 from megapose.config import LOCAL_DATA_DIR
@@ -59,6 +59,7 @@ class MegaposeInference(Node):
 
         self.pose_pub = self.create_publisher(PoseStamped, 'pose', 10)
         self.marker_pub = self.create_publisher(Marker, "model_marker", 10)
+        self.reference_pub = self.create_publisher(Image, "reference_image", 10)
 
         self.sub = self.create_subscription(DetectionOutput, '/detection_output', self.detection_output_callback, 10)
         self.sub
@@ -67,6 +68,7 @@ class MegaposeInference(Node):
         try:
 
             self.run_inference(msg.camera_info_json, msg.bounding_box_json, msg.color_image, msg.aligned_depth_image, self.ply_path, "megapose-1.0-RGB-multi-hypothesis")
+            self.reference_pub.publish(msg.color_image)
             
 
         except Exception as e:
@@ -84,7 +86,7 @@ class MegaposeInference(Node):
 
         depth = None
         if load_depth:
-            depth_img = self.bridge.imgmsg_to_cv2(depth_msg, desired_encoding="rgb8")
+            depth_img = self.bridge.imgmsg_to_cv2(depth_msg, desired_encoding="16UC1")
             depth = np.array(depth_img, dtype=np.float32) / 1000
             assert depth.shape[:2] == camera_data.resolution
 
