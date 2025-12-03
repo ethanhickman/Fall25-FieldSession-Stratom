@@ -99,36 +99,6 @@ class DarknetDetection(Node):
             print(e)
             self.get_logger().error("Error converting image")
 
-"""
-    def color_callback(self, msg):
-        try:
-            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
-
-            with tempfile.NamedTemporaryFile(suffix=".jpg") as prediction_img:
-                cv2.imwrite(prediction_img.name, cv_image)
-                DarkHelp.PredictFN(self.dh, prediction_img.name.encode())
-
-                with tempfile.NamedTemporaryFile(suffix=".jpg") as annotated_img:
-                    DarkHelp.Annotate(self.dh, annotated_img.name.encode())
-                    annotated_cv_image = cv2.imread(annotated_img.name)
-
-                    j = json.loads(DarkHelp.GetPredictionResults(self.dh))
-                    prediction = j['file'][0]['prediction'][0]
-                    data = [{
-                        "label": prediction['name'],
-                        "bbox_modal": [prediction['rect']['x'], prediction['rect']['y'], prediction['rect']['x'] + prediction['rect']['width'], prediction['rect']['y'] + prediction['rect']['height']]
-                    }]
-                    print(json.dumps(data))
-
-
-                    cv2.imshow("RealSense RGB image", annotated_cv_image)
-                    cv2.waitKey(1)
-
-        except Exception as e:
-            print(e)
-            self.get_logger().error("Error converting image")
-"""
-
 def main(args=None):
     rclpy.init(args=args)
     node = DarknetDetection()
