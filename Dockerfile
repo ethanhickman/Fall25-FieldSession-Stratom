@@ -158,15 +158,6 @@ RUN apt-get update && sudo apt-get install -y \
   && make package \
   && dpkg -i darkhelp*.deb
 
-# Megapose (Note: might want to create a fork of this because currently megapose is unmaintained)
-RUN apt-get update && sudo apt-get install -y \
-  git \
-  && mkdir /opt/megapose6d \
-  && git clone https://github.com/megapose6d/megapose6d.git /opt/megapose6d/
-
-# Megapose env vars needed
-ENV PYTHONPATH /opt/megapose6d/src/:$PYTHONPATH
-ENV CONDA_PREFIX $(python3 -c "import sys; print(sys.prefix)")
 
 # Megapose dependencies
 RUN pip install bokeh
@@ -185,6 +176,23 @@ RUN pip install open3d
 RUN pip install roma
 RUN pip install ipython
 RUN pip install selenium
+
+# Megapose env vars needed
+ENV PYTHONPATH /opt/megapose6d/src/:$PYTHONPATH
+ENV CONDA_PREFIX $(python3 -c "import sys; print(sys.prefix)")
+ENV MEGAPOSE_DATA_DIR /opt/megapose6d-data
+
+# Megapose (Note: might want to create a fork of this because currently megapose is unmaintained)
+RUN apt-get update && sudo apt-get install -y \
+  git \
+  rclone \
+  && mkdir /opt/megapose6d \
+  && git clone https://github.com/megapose6d/megapose6d.git /opt/megapose6d/ \
+  && cd /opt/megapose6d \
+  && git submodule update --init \
+  && mkdir /opt/megapose6d-data
+
+COPY megapose-models/ /opt/megapose6d-data/megapose-models/
 
 
 RUN pip install pandas

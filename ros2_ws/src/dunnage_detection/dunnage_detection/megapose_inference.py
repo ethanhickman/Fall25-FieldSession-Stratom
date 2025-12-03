@@ -7,6 +7,8 @@ import numpy as np
 import cv2
 from ament_index_python.packages import get_package_share_directory
 
+from visualization_msgs.msg import Marker
+from geometry_msgs.msg import PoseStamped
 from dunnage_detection_interfaces.msg import DetectionOutput
 
 # Standard Library
@@ -52,15 +54,17 @@ class MegaposeInference(Node):
 
         self.bridge = CvBridge()
 
+        self.object_dataset = self.make_object_dataset(self.ply_path)
+        self.pose_estimator = load_named_model("megapose-1.0-RGB-multi-hypothesis", self.object_dataset).cuda()
+
+        self.pose_pub = self.create_publisher(PoseStamped, 'pose', 10)
+        self.marker_pub = self.create_publisher(Marker, "model_marker", 10)
+
         self.sub = self.create_subscription(DetectionOutput, '/detection_output', self.detection_output_callback, 10)
         self.sub
 
     def detection_output_callback(self, msg):
         try:
-            #output_msg.color_image = color
-            #output_msg.aligned_depth_image = depth
-            #print(msg.camera_info_json)
-            #print(msg.bounding_box_json)
 
             self.run_inference(msg.camera_info_json, msg.bounding_box_json, msg.color_image, msg.aligned_depth_image, self.ply_path, "megapose-1.0-RGB-multi-hypothesis")
             
@@ -119,8 +123,52 @@ class MegaposeInference(Node):
         object_data = [
             ObjectData(label=label, TWO=Transform(pose)) for label, pose in zip(labels, poses)
         ]
-        object_data_json = json.dumps([x.to_json() for x in object_data])
-        print(object_data_json)
+        #object_data_json = json.dumps([x.to_json() for x in object_data])
+        #print(object_data_json)
+        for x in object_data:
+
+            # pose data as pose stamped message
+            pose_json = x.to_json()
+            pose_msg = PoseStamped()
+            pose_msg.header.stamp = self.get_clock().now().to_msg()
+            pose_msg.header.frame_id = "map"
+
+            pose_msg.pose.position.x = pose_json["TWO"][1][0]
+            pose_msg.pose.position.y = pose_json["TWO"][1][1]
+            pose_msg.pose.position.z = pose_json["TWO"][1][2]
+
+            pose_msg.pose.orientation.x = pose_json["TWO"][0][0]
+            pose_msg.pose.orientation.y = pose_json["TWO"][0][1]
+            pose_msg.pose.orientation.z = pose_json["TWO"][0][2]
+            pose_msg.pose.orientation.w = pose_json["TWO"][0][3]
+
+            self.pose_pub.publish(pose_msg)
+
+            # Marker so model is viewable in rviz
+            marker = Marker()
+            marker.header = pose_msg.header
+            marker.ns = "model"
+            marker.id = 0
+            marker.type = Marker.MESH_RESOURCE
+            marker.action = Marker.ADD
+
+            marker.mesh_resource = "file://" + self.ply_path
+            marker.mesh_use_embedded_materials = False
+            marker.color.r = 1.0
+            marker.color.g = 1.0
+            marker.color.b = 1.0
+            marker.color.a = 1.0
+
+            # Use pose from PoseStamped
+            marker.pose = pose_msg.pose
+
+            marker.scale.x = 0.005
+            marker.scale.y = 0.005
+            marker.scale.z = 0.005
+
+            self.marker_pub.publish(marker)
+
+
         return
 
 
@@ -130,34 +178,19 @@ class MegaposeInference(Node):
 
         observation = self.load_observation_tensor(camera_data_str, color_msg, depth_msg, load_depth=model_info["requires_depth"]).cuda()
         detections = self.load_detections(object_data_str).cuda()
-        object_dataset = self.make_object_dataset(mesh_path)
+        #object_dataset = self.make_object_dataset(mesh_path)
 
-        # logger.info(f"Loading model {model_name}.")
-        print(f"Loading model {model_name}")
-        pose_estimator = load_named_model(model_name, object_dataset).cuda()
+        #print(f"Loading model {model_name}")
+        #pose_estimator = load_named_model(model_name, object_dataset).cuda()
 
         print(f"Running inference.")
-        output, _ = pose_estimator.run_inference_pipeline(
+        output, _ = self.pose_estimator.run_inference_pipeline(
             observation, detections=detections, **model_info["inference_parameters"]
         )
 
         self.save_predictions(output)
         return
 
-#if __name__ == "__main__":
-#    set_logging_level("info")
-#    parser = argparse.ArgumentParser()
-#    parser.add_argument("example_name")
-#    parser.add_argument("--model", type=str, default="megapose-1.0-RGB-multi-hypothesis")
-#    parser.add_argument("--run-inference", action="store_true")
-#    args = parser.parse_args()
-#
-#    #example_dir = LOCAL_DATA_DIR / "examples" / args.example_name
-#    if args.run_inference:
-#        run_inference(Path(args.example_name), args.model)
-#
-#    #if args.run_inference:
-#    #    run_inference(example_dir, args.model)
 
 # MEGAPOSE ---------------
 def main(args=None):
